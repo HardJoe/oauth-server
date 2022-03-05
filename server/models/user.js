@@ -28,7 +28,7 @@ var UserSchema = new Schema({
     trim: true,
   },
   phone: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
     trim: true,
@@ -45,10 +45,6 @@ var UserSchema = new Schema({
         required: true,
       },
       token: {
-        type: String,
-        required: true,
-      },
-      refresh: {
         type: String,
         required: true,
       },

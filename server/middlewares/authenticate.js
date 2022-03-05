@@ -5,6 +5,7 @@ const User = require('../models/user');
  */
 var verifyAuthToken = function (req, res, next) {
   var token = req.header('x-auth');
+  console.log('token', token);
   User.findByToken(token, 'auth')
     .then(function (data) {
       if (!data.user) {
