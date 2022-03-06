@@ -7,6 +7,7 @@ const {
   verifyAuthToken,
   verifyOAuthCode,
 } = require('../middlewares/authenticate');
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -36,23 +37,61 @@ router
   });
 router
   .route('/token')
-  .get(projectMiddleware, verifyOAuthCode, async function (req, res) {
-    if (req.project.projectSecret != req.query.projectSecret) {
+  // .get(projectMiddleware, verifyOAuthCode, async function (req, res) {
+  //   if (req.project.projectSecret != req.query.projectSecret) {
+  //     return res
+  //       .status(400)
+  //       .send({ code: 400, message: 'Mismatch ProjectID and Secret' });
+  //   }
+  //   user = req.user;
+
+  //   user
+  //     .generateAccessToken(req.decoded.scope)
+  //     .then((token) => {
+  //       return user.removeToken(req.token).then((e) => {
+  //         return token;
+  //       });
+  //     })
+  //     .then((token) => {
+  //       res.send({ access_token: token });
+  //     })
+  //     .catch((e) => {
+  //       res
+  //         .status(400)
+  //         .send({ message: 'Error while generating access token' });
+  //     });
+  // });
+  .post(projectMiddleware, verifyAuthToken, async function (req, res) {
+    if (req.project.projectSecret != req.body.client_secret) {
       return res
         .status(400)
-        .send({ code: 400, message: 'Mismatch ProjectID and Secret' });
+        .send({ code: 400, message: 'Mismatch clientID and Secret' });
+    }
+    var body = R.pick(['username', 'password'], req.body);
+    try {
+      var user = await User.findByIdentity(body.username, body.password);
+    } catch (e) {
+      console.log(e);
+      res.status(400).send({ code: 400, message: e });
     }
     user = req.user;
+    console.log('user', user);
 
     user
-      .generateAccessToken(req.decoded.scope)
+      .generateAccessToken()
       .then((token) => {
         return user.removeToken(req.token).then((e) => {
           return token;
         });
       })
       .then((token) => {
-        res.send({ access_token: token });
+        res.send({
+          access_token: token,
+          expires_in: 300,
+          token_type: 'Bearer',
+          scope: null,
+          refresh_token: null,
+        });
       })
       .catch((e) => {
         res

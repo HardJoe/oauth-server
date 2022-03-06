@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 require('dotenv').config({ path: './.env' });
 
 var Schema = mongoose.Schema;
@@ -91,15 +92,11 @@ UserSchema.methods.generateOAuthCode = function (project) {
  * This function will be used later in the article in step 3 while exchanging access_token
  * for Authorization Code. You can ignore it for now.
  */
-UserSchema.methods.generateAccessToken = function (scope) {
+UserSchema.methods.generateAccessToken = function () {
   var user = this;
   var access = 'access_token';
-  var token = jwt
-    .sign(
-      { _id: user._id.toHexString(), access, scope },
-      process.env.JWT_SECRET
-    )
-    .toString();
+  const token = crypto.randomBytes(20).toString('hex');
+  console.log('cryptotoken', token);
   user.tokens.push({ access, token });
   return user.save().then(function () {
     return token;
@@ -131,6 +128,24 @@ UserSchema.statics.findByCredentials = function (email, password) {
   return User.findOne({ email }).then(function (user) {
     if (!user) {
       return Promise.reject({ code: 400, message: 'Invalid Credentials' });
+    }
+    return new Promise(function (resolve, reject) {
+      bcrypt.compare(password, user.password, function (err, res) {
+        if (res) {
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
+  });
+};
+
+UserSchema.statics.findByIdentity = function (userId, password) {
+  var User = this;
+  return User.findOne({ userId }).then(function (user) {
+    if (!user) {
+      return Promise.reject({ code: 400, message: 'Invalid Identity' });
     }
     return new Promise(function (resolve, reject) {
       bcrypt.compare(password, user.password, function (err, res) {

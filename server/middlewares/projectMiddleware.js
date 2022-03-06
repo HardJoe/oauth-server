@@ -1,9 +1,11 @@
 const Project = require('../models/project');
 
 var projectMiddle = function (req, res, next) {
-  var projectID = req.query.projectID;
-  var redirectURL = req.query.redirectURL;
-  var scope = req.query.scope;
+  console.log('req.body', req.body);
+  var projectID = req.body.client_id;
+  console.log('projectID', projectID);
+  // var redirectURL = req.body.redirectURL;
+  // var scope = req.body.scope;
   Project.findOne({ projectID })
     .then(function (project) {
       if (!project) {
@@ -12,12 +14,12 @@ var projectMiddle = function (req, res, next) {
           message: 'Project ID does not exist',
         });
       }
-      if (!project.redirectURLs.includes(redirectURL)) {
-        return Promise.reject({ code: 400, message: 'Redirect URL mismatch' });
-      }
-      if (project.scope != scope) {
-        return Promise.reject({ code: 400, message: 'Invalid Scope' });
-      }
+      // if (!project.redirectURLs.includes(redirectURL)) {
+      //   return Promise.reject({ code: 400, message: 'Redirect URL mismatch' });
+      // }
+      // if (project.scope != scope) {
+      //   return Promise.reject({ code: 400, message: 'Invalid Scope' });
+      // }
       req.project = project;
       next();
     })

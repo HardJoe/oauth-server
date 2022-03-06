@@ -32,6 +32,7 @@ router.route('/login').post(async function (req, res) {
   try {
     var user = await User.findByCredentials(body.email, body.password);
     var token = await user.generateAuthToken();
+    console.log('token', token);
     res.header('x-auth', token).send(R.pick(['name'], user));
   } catch (e) {
     console.log(e);
