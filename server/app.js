@@ -2,19 +2,14 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const express = require('express');
 
-const app = express();
-const publicPath = path.join(__dirname, '../public');
 const userRouter = require('./routes/UserRoutes');
 const projectRouter = require('./routes/ProjectRoutes');
 const OAuthRouter = require('./routes/OAuthRoutes');
 
+const app = express();
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(
-  express.static(publicPath, {
-    extensions: ['html'],
-  })
-);
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,4 +26,5 @@ app.use(function (req, res, next) {
 app.use('/api/user', userRouter);
 app.use('/api/project', projectRouter);
 app.use('/api/oauth', OAuthRouter);
+
 module.exports = app;
