@@ -35,70 +35,41 @@ router
       res.status(500).send({ message: 'Unknown Error', code: 500 });
     }
   });
-router
-  .route('/token')
-  // .get(projectMiddleware, verifyOAuthCode, async function (req, res) {
-  //   if (req.project.projectSecret != req.query.projectSecret) {
-  //     return res
-  //       .status(400)
-  //       .send({ code: 400, message: 'Mismatch ProjectID and Secret' });
-  //   }
-  //   user = req.user;
+router.route('/token').post(projectMiddleware, async function (req, res) {
+  if (req.project.projectSecret != req.body.client_secret) {
+    return res
+      .status(400)
+      .send({ code: 400, message: 'Mismatch clientID and Secret' });
+  }
+  var body = R.pick(['username', 'password'], req.body);
+  try {
+    var user = await User.findByIdentity(body.username, body.password);
+  } catch (e) {
+    console.log(e);
+    res.status(400).send({ code: 400, message: e });
+  }
+  console.log('user', user);
 
-  //   user
-  //     .generateAccessToken(req.decoded.scope)
-  //     .then((token) => {
-  //       return user.removeToken(req.token).then((e) => {
-  //         return token;
-  //       });
-  //     })
-  //     .then((token) => {
-  //       res.send({ access_token: token });
-  //     })
-  //     .catch((e) => {
-  //       res
-  //         .status(400)
-  //         .send({ message: 'Error while generating access token' });
-  //     });
-  // });
-  .post(projectMiddleware, verifyAuthToken, async function (req, res) {
-    if (req.project.projectSecret != req.body.client_secret) {
-      return res
-        .status(400)
-        .send({ code: 400, message: 'Mismatch clientID and Secret' });
-    }
-    var body = R.pick(['username', 'password'], req.body);
-    try {
-      var user = await User.findByIdentity(body.username, body.password);
-    } catch (e) {
-      console.log(e);
-      res.status(400).send({ code: 400, message: e });
-    }
-    user = req.user;
-    console.log('user', user);
-
-    user
-      .generateAccessToken()
-      .then((token) => {
-        return user.removeToken(req.token).then((e) => {
-          return token;
-        });
-      })
-      .then((token) => {
-        res.send({
-          access_token: token,
-          expires_in: 300,
-          token_type: 'Bearer',
-          scope: null,
-          refresh_token: null,
-        });
-      })
-      .catch((e) => {
-        res
-          .status(400)
-          .send({ message: 'Error while generating access token' });
+  user
+    .generateAccessToken()
+    .then((token) => {
+      return user.removeToken(req.token).then((e) => {
+        return token;
       });
-  });
+    })
+    .then((token) => {
+      res.send({
+        access_token: token,
+        expires_in: 300,
+        token_type: 'Bearer',
+        scope: null,
+        refresh_token: null,
+      });
+    })
+    .catch((e) => {
+      res.status(400).send({ message: 'Error while generating access token' });
+    });
+});
 
 router.route('/userinfo').get(verifyAccessToken, async function (req, res) {
   token = req.decoded;

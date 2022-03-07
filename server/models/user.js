@@ -96,7 +96,6 @@ UserSchema.methods.generateAccessToken = function () {
   var user = this;
   var access = 'access_token';
   const token = crypto.randomBytes(20).toString('hex');
-  console.log('cryptotoken', token);
   user.tokens.push({ access, token });
   return user.save().then(function () {
     return token;
