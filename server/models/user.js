@@ -1,18 +1,20 @@
+require('dotenv').config({ path: './.env' });
+
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-require('dotenv').config({ path: './.env' });
 
 var Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-  userId: {
+  username: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
   },
-  name: {
+  fullName: {
     type: String,
     required: true,
     trim: true,
@@ -22,29 +24,21 @@ var UserSchema = new Schema({
     required: true,
     trim: true,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
   password: {
     type: String,
-    minlength: 6,
+    required: true,
   },
   createdAt: { type: Date, default: Date.now },
-  tokens: [
+  accessTokens: [
     {
-      access: {
+      token: {
         type: String,
         required: true,
       },
+    },
+  ],
+  refreshTokens: [
+    {
       token: {
         type: String,
         required: true,

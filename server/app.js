@@ -23,8 +23,8 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use('/api/user', userRouter);
-app.use('/api/project', projectRouter);
-app.use('/api/oauth', OAuthRouter);
+app.use('/user', userRouter);
+app.use('/project', projectRouter);
+app.use('/oauth', OAuthRouter);
 
 module.exports = app;
