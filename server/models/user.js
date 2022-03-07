@@ -14,7 +14,7 @@ var UserSchema = new Schema({
     unique: true,
     trim: true,
   },
-  fullName: {
+  full_name: {
     type: String,
     required: true,
     trim: true,
@@ -28,8 +28,8 @@ var UserSchema = new Schema({
     type: String,
     required: true,
   },
-  createdAt: { type: Date, default: Date.now },
-  accessTokens: [
+  created_at: { type: Date, default: Date.now },
+  access_tokens: [
     {
       token: {
         type: String,
@@ -37,7 +37,7 @@ var UserSchema = new Schema({
       },
     },
   ],
-  refreshTokens: [
+  refresh_tokens: [
     {
       token: {
         type: String,
