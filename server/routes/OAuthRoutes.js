@@ -42,4 +42,19 @@ router.route('/token').post(projectMiddleware, async function (req, res) {
     });
 });
 
+router.route('/resource').post(verifyAccessToken, async function (req, res) {
+  user = req.user;
+
+  res.send({
+    access_token: req.token,
+    client_id: null,
+    user_id: user.username,
+    full_name: user.full_name,
+    npm: user.npm,
+    expires: null,
+    token_type: 'Bearer',
+    refresh_token: user.refresh_tokens[user.refresh_tokens.length - 1].token,
+  });
+});
+
 module.exports = router;

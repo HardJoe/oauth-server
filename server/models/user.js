@@ -57,6 +57,14 @@ UserSchema.methods.generateAccessToken = function () {
   });
 };
 
+UserSchema.statics.findByToken = async function (token) {
+  var User = this;
+  const user = await User.findOne({
+    'access_tokens.token': token,
+  });
+  return { user };
+};
+
 UserSchema.statics.findByIdentity = function (userId, password) {
   var User = this;
   return User.findOne({ userId }).then(function (user) {

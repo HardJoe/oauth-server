@@ -27,7 +27,6 @@ var verifyAuthToken = function (req, res, next) {
 /*
  * This function takes the code token from query, validates it,
  * and matches it with project data.
- * This function will be used in step 3 while exchanging access_token for Authorization Code.
  */
 var verifyOAuthCode = function (req, res, next) {
   var token = req.query.code;
@@ -65,17 +64,16 @@ var verifyOAuthCode = function (req, res, next) {
 /*
  * This function takes the access_token token from query, validates it,
  * and find the user to which it belongs.
- * This function will be used in step 3 while getting user info from access_token.
  */
 var verifyAccessToken = function (req, res, next) {
-  var token = req.query.access_token;
-  User.findByToken(token, 'access_token')
+  const token = req.header('Authorization').split(' ')[1];
+
+  User.findByToken(token)
     .then(function (data) {
       if (!data.user) {
         return Promise.reject({ code: 403, message: 'Invalid Access Token' });
       }
       req.user = data.user;
-      req.decoded = data.decoded;
       req.token = token;
       next();
     })
@@ -88,4 +86,5 @@ var verifyAccessToken = function (req, res, next) {
       }
     });
 };
+
 module.exports = { verifyAccessToken, verifyAuthToken, verifyOAuthCode };
