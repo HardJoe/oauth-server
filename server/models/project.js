@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var ProjectSchema = new Schema({
-  projectID: {
+  client_id: {
     type: String,
     required: true,
     unique: true,
   },
-  projectSecret: {
+  client_secret: {
     type: String,
     required: true,
     unique: true,
@@ -16,21 +16,6 @@ var ProjectSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-  },
-  redirectURLs: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
-  scope: {
-    type: String,
-    enum: ['default', 'email', 'phone', 'full'],
-    default: 'default',
-  },
-  createdBy: {
-    type: Schema.ObjectId,
-    required: true,
   },
   createdAt: { type: Date, default: Date.now },
 });

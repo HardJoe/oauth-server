@@ -9,7 +9,7 @@ router.route('/register').post(function (req, res) {
   var body = R.pick(['username', 'full_name', 'npm', 'password'], req.body);
   body.fullName = body.full_name;
   delete body.full_name;
-  console.log('body', body);
+
   var user = new User(body);
   user
     .save()
