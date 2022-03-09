@@ -15,29 +15,34 @@ const router = express.Router();
 router
   .route('/token')
   .post([verifyUser, verifyProject], async function (req, res) {
-    const accessToken = new AccessToken({
-      token: crypto.randomBytes(20).toString('hex'),
-      client_id: req.body.client_id,
-      username: req.body.username,
-    });
-    const refreshToken = new RefreshToken({
-      token: crypto.randomBytes(20).toString('hex'),
-      client_id: req.body.client_id,
-      username: req.body.username,
-    });
+    try {
+      const accessToken = new AccessToken({
+        token: crypto.randomBytes(20).toString('hex'),
+        client_id: req.body.client_id,
+        username: req.body.username,
+      });
+      const refreshToken = new RefreshToken({
+        token: crypto.randomBytes(20).toString('hex'),
+        client_id: req.body.client_id,
+        username: req.body.username,
+      });
 
-    const at = await accessToken.save();
-    const rt = await refreshToken.save();
+      const at = await accessToken.save();
+      const rt = await refreshToken.save();
 
-    console.log('at', at);
-
-    res.send({
-      access_token: at.token,
-      expires_in: 300,
-      token_type: 'Bearer',
-      scope: null,
-      refresh_token: rt.token,
-    });
+      res.send({
+        access_token: at.token,
+        expires_in: 300,
+        token_type: 'Bearer',
+        scope: at.scope,
+        refresh_token: rt.token,
+      });
+    } catch {
+      res.status(401).send({
+        error: 'invalid_request',
+        error_description: 'ada kesalahan masbro!',
+      });
+    }
   });
 
 router.route('/resource').post(verifyAccessToken, async function (req, res) {
