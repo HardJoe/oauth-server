@@ -7,6 +7,7 @@ const {
   verifyAccessToken,
   verifyUser,
 } = require('../middlewares/authenticate');
+const User = require('../models/user');
 const AccessToken = require('../models/accessToken');
 const RefreshToken = require('../models/refreshToken');
 
@@ -46,17 +47,24 @@ router
   });
 
 router.route('/resource').post(verifyAccessToken, async function (req, res) {
-  user = req.user;
+  const at = req.at;
+  const user = await User.findOne({ username: at.username });
+  const refreshToken = new RefreshToken({
+    token: crypto.randomBytes(20).toString('hex'),
+    client_id: at.client_id,
+    username: at.username,
+  });
+  const rt = await refreshToken.save();
 
   res.send({
-    access_token: req.token,
-    client_id: null,
-    user_id: user.username,
+    access_token: at.token,
+    client_id: at.client_id,
+    user_id: at.username,
     full_name: user.full_name,
     npm: user.npm,
     expires: null,
     token_type: 'Bearer',
-    refresh_token: user.refresh_tokens[user.refresh_tokens.length - 1].token,
+    refresh_token: rt.token,
   });
 });
 

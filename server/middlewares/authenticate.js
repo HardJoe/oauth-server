@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 const User = require('../models/user');
+const AccessToken = require('../models/accessToken');
 
 /*
  * This function takes the x-auth token from header, validates it,
@@ -68,26 +69,29 @@ var verifyOAuthCode = function (req, res, next) {
  * This function takes the access_token token from query, validates it,
  * and find the user to which it belongs.
  */
-var verifyAccessToken = function (req, res, next) {
-  const token = req.header('Authorization').split(' ')[1];
+var verifyAccessToken = async function (req, res, next) {
+  try {
+    const token = req.header('Authorization').split(' ')[1];
 
-  User.findByToken(token)
-    .then(function (data) {
-      if (!data.user) {
-        return Promise.reject({ code: 403, message: 'Invalid Access Token' });
-      }
-      req.user = data.user;
-      req.token = token;
-      next();
-    })
-    .catch(function (e) {
-      if (e.code) {
-        res.status(e.code).send(e);
-      } else {
-        console.log(e);
-        res.status(500).send({ code: 500, message: 'Unknown Error' });
-      }
+    const at = await AccessToken.findOne({ token });
+    if (!at) {
+      throw new Error();
+    }
+
+    const expiryTime = at.created_at.getTime() + 5 * 60 * 1000;
+    const now = new Date().getTime();
+    if (expiryTime < now) {
+      throw new Error();
+    }
+
+    req.at = at;
+    next();
+  } catch {
+    res.status(401).send({
+      error: 'invalid_token',
+      error_description: 'token salah masbro!',
     });
+  }
 };
 
 const verifyUser = function (req, res, next) {
