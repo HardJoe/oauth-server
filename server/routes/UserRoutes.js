@@ -8,6 +8,7 @@ const router = express.Router();
 router.route('/register').post(function (req, res) {
   var body = R.pick(['username', 'full_name', 'npm', 'password'], req.body);
   var user = new User(body);
+
   user
     .save()
     .then(function () {

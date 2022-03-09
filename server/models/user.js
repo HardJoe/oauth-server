@@ -28,30 +28,22 @@ var UserSchema = new Schema({
     required: true,
   },
   created_at: { type: Date, default: Date.now },
-  access_tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-  refresh_tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
 });
 
-UserSchema.methods.generateAccessToken = function () {
+UserSchema.methods.generateAccessToken = function (client_id) {
   var user = this;
   const accessToken = crypto.randomBytes(20).toString('hex');
-  user.access_tokens.push({ token: accessToken });
+  user.access_tokens.push({
+    token: accessToken,
+    client_id,
+    expires: new Date(Date.now + 5 * 60000),
+  });
   const refreshToken = crypto.randomBytes(20).toString('hex');
-  user.refresh_tokens.push({ token: refreshToken });
+  user.access_tokens.push({
+    token: refreshToken,
+    client_id,
+    expires: new Date(Date.now + 30 * 60000),
+  });
   return user.save().then(function () {
     return { accessToken, refreshToken };
   });
@@ -63,24 +55,6 @@ UserSchema.statics.findByToken = async function (token) {
     'access_tokens.token': token,
   });
   return { user };
-};
-
-UserSchema.statics.findByIdentity = function (userId, password) {
-  var User = this;
-  return User.findOne({ userId }).then(function (user) {
-    if (!user) {
-      return Promise.reject({ code: 400, message: 'Invalid Identity' });
-    }
-    return new Promise(function (resolve, reject) {
-      bcrypt.compare(password, user.password, function (err, res) {
-        if (res) {
-          resolve(user);
-        } else {
-          reject();
-        }
-      });
-    });
-  });
 };
 
 UserSchema.pre('save', function (next) {

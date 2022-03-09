@@ -8,8 +8,9 @@ var AccessTokenSchema = new Schema({
     required: true,
     unique: true,
   },
-  expires: {
+  created_at: {
     type: Date,
+    default: Date.now,
     required: true,
   },
   client_id: {
@@ -19,6 +20,10 @@ var AccessTokenSchema = new Schema({
   username: {
     type: String,
     required: true,
+  },
+  scope: {
+    type: String,
+    default: null,
   },
 });
 

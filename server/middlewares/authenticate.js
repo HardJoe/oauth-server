@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
+
 const User = require('../models/user');
+
 /*
  * This function takes the x-auth token from header, validates it,
  * and finds the user by that.
@@ -87,4 +90,43 @@ var verifyAccessToken = function (req, res, next) {
     });
 };
 
-module.exports = { verifyAccessToken, verifyAuthToken, verifyOAuthCode };
+const verifyUser = function (req, res, next) {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  User.findOne({ username })
+    .then(function (user) {
+      if (!user) {
+        return Promise.reject();
+      }
+      return user;
+    })
+    .then(function (user) {
+      return new Promise(function (resolve, reject) {
+        bcrypt.compare(password, user.password, function (err, res) {
+          if (res) {
+            resolve(user);
+          } else {
+            reject();
+          }
+        });
+      });
+    })
+    .then(function (user) {
+      req.user = user;
+      next();
+    })
+    .catch(function (e) {
+      res.status(401).send({
+        error: 'invalid_request',
+        error_description: 'ada kesalahan masbro!',
+      });
+    });
+};
+
+module.exports = {
+  verifyAccessToken,
+  verifyAuthToken,
+  verifyOAuthCode,
+  verifyUser,
+};
