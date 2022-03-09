@@ -2,12 +2,11 @@ const express = require('express');
 const R = require('ramda');
 const crypto = require('crypto');
 
-const findProject = require('../middlewares/projectMiddleware');
+const { verifyProject } = require('../middlewares/projectMiddleware');
 const {
   verifyAccessToken,
   verifyUser,
 } = require('../middlewares/authenticate');
-const User = require('../models/user');
 const AccessToken = require('../models/accessToken');
 const RefreshToken = require('../models/refreshToken');
 
@@ -15,20 +14,7 @@ const router = express.Router();
 
 router
   .route('/token')
-  .post([verifyUser, findProject], async function (req, res) {
-    if (req.project.client_secret != req.body.client_secret) {
-      return res
-        .status(401)
-        .send({ code: 401, message: 'Mismatch client_id and client_secret' });
-    }
-    // var body = R.pick(['username', 'password'], req.body);
-    // try {
-    //   var user = await User.findByCredentials(body.username, body.password);
-    //   console.log('user', user);
-    // } catch (e) {
-    //   console.log(e);
-    // }
-
+  .post([verifyUser, verifyProject], async function (req, res) {
     const accessToken = new AccessToken({
       token: crypto.randomBytes(20).toString('hex'),
       client_id: req.body.client_id,

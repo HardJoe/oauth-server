@@ -1,25 +1,32 @@
 const Project = require('../models/project');
 
-const findProject = function (req, res, next) {
+const verifyProject = function (req, res, next) {
   const client_id = req.body.client_id;
+  const client_secret = req.body.client_secret;
+
   Project.findOne({ client_id })
     .then(function (project) {
       if (!project) {
-        return Promise.reject({
-          code: 404,
-          message: 'Project ID does not exist',
-        });
+        return Promise.reject();
       }
+      return project;
+    })
+    .then(function (project) {
+      if (client_secret != project.client_secret) {
+        return Promise.reject();
+      }
+      return project;
+    })
+    .then(function (project) {
       req.project = project;
       next();
     })
     .catch(function (e) {
-      if (e.code) {
-        res.status(e.code).send(e);
-      } else {
-        res.status(500).send({ message: 'Unknown Error' });
-      }
+      res.status(401).send({
+        error: 'invalid_request',
+        error_description: 'ada kesalahan masbro!',
+      });
     });
 };
 
-module.exports = findProject;
+module.exports = { verifyProject };
