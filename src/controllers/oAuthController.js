@@ -37,25 +37,26 @@ const generateToken = async function (req, res) {
 };
 
 const getResource = async function (req, res) {
-  const at = req.at;
-  const user = await User.findOne({ username: at.username });
-  const refreshToken = new RefreshToken({
-    token: crypto.randomBytes(20).toString('hex'),
-    client_id: at.client_id,
-    username: at.username,
-  });
-  const rt = await refreshToken.save();
+  try {
+    const at = req.at;
+    const user = await User.findOne({ username: at.username });
 
-  res.send({
-    access_token: at.token,
-    client_id: at.client_id,
-    user_id: at.username,
-    full_name: user.full_name,
-    npm: user.npm,
-    expires: null,
-    token_type: 'Bearer',
-    refresh_token: rt.token,
-  });
+    res.send({
+      access_token: at.token,
+      client_id: at.client_id,
+      user_id: at.username,
+      full_name: user.full_name,
+      npm: user.npm,
+      expires: at.scope,
+      token_type: 'Bearer',
+      refresh_token: at.refresh_token,
+    });
+  } catch {
+    res.status(401).send({
+      error: 'invalid_request',
+      error_description: 'token salah masbro!',
+    });
+  }
 };
 
 module.exports = { generateToken, getResource };
