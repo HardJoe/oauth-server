@@ -2,8 +2,8 @@ require('dotenv').config();
 
 const http = require('http');
 
-const app = require('./server/app');
-const mongoose = require('./server/db/connectDb');
+const app = require('./src/app');
+const mongoose = require('./src/db/connectDb');
 
 const server = http.createServer(app);
 
