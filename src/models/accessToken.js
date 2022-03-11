@@ -25,6 +25,10 @@ var AccessTokenSchema = new Schema({
     type: String,
     default: null,
   },
+  refresh_token: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model('AccessToken', AccessTokenSchema);
