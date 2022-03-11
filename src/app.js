@@ -10,6 +10,9 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.get('/', (req, res) => {
+  res.send('Welcome to OAuth Server "From Scratch" by HardJoe!');
+});
 app.use('/user', userRouter);
 app.use('/project', projectRouter);
 app.use('/oauth', oAuthRouter);
