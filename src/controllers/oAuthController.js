@@ -48,7 +48,6 @@ const getResource = async function (req, res) {
       full_name: user.full_name,
       npm: user.npm,
       expires: at.scope,
-      token_type: 'Bearer',
       refresh_token: at.refresh_token,
     });
   } catch {
