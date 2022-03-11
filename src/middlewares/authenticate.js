@@ -3,7 +3,31 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const AccessToken = require('../models/accessToken');
 
-var verifyAccessToken = async function (req, res, next) {
+const verifyUser = async function (req, res, next) {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      throw new Error();
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+    if (isValid) {
+      req.user = user;
+      next();
+    } else {
+      throw new Error();
+    }
+  } catch (e) {
+    res.status(401).send({
+      error: 'invalid_request',
+      error_description: 'ada kesalahan masbro!',
+    });
+  }
+};
+
+const verifyAccessToken = async function (req, res, next) {
   try {
     const token = req.header('Authorization').split(' ')[1];
 
@@ -26,40 +50,6 @@ var verifyAccessToken = async function (req, res, next) {
       error_description: 'token salah masbro!',
     });
   }
-};
-
-const verifyUser = function (req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
-
-  User.findOne({ username })
-    .then(function (user) {
-      if (!user) {
-        return Promise.reject();
-      }
-      return user;
-    })
-    .then(function (user) {
-      return new Promise(function (resolve, reject) {
-        bcrypt.compare(password, user.password, function (err, res) {
-          if (res) {
-            resolve(user);
-          } else {
-            reject();
-          }
-        });
-      });
-    })
-    .then(function (user) {
-      req.user = user;
-      next();
-    })
-    .catch(function (e) {
-      res.status(401).send({
-        error: 'invalid_request',
-        error_description: 'ada kesalahan masbro!',
-      });
-    });
 };
 
 module.exports = { verifyAccessToken, verifyUser };
